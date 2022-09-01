@@ -1,3 +1,4 @@
+from email.mime.text import MIMEText
 import os
 from tqdm import tqdm
 import numpy as np
@@ -5,6 +6,7 @@ import pandas as pd
 import cv2
 import time
 import re
+import smtplib, ssl
 
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
@@ -13,6 +15,28 @@ from deepface import DeepFace
 from deepface.extendedmodels import Age
 from deepface.commons import functions, realtime, distance as dst
 from deepface.detectors import FaceDetector
+from email.mime.multipart import MIMEMultipart
+
+def send_email(subject, contents):
+	port = 587  # For starttls
+	smtp_server = "smtp.outlook.com"
+	sender_email = "akshay.ramaswamy@bd.com"
+	receiver_email = "akshay.ramaswamy@bd.com"
+	password = os.environ.get('EMAIL_PASSWD')  # Environment variable set to store password
+	message = MIMEMultipart("alternative")
+	message['Subject'] = subject
+	text = contents
+
+	body = MIMEText(text, "plain")
+	message.attach(body)
+
+	context = ssl.create_default_context()
+	with smtplib.SMTP(smtp_server, port) as server:
+		server.ehlo()
+		server.starttls(context=context)
+		server.ehlo()
+		server.login(sender_email, password)
+		server.sendmail(sender_email, receiver_email, message.as_string())
 
 def analysis(db_path, model_name = 'VGG-Face', detector_backend = 'opencv', distance_metric = 'cosine', enable_face_analysis = True, source = 0, time_threshold = 5, frame_threshold = 5):
 
@@ -372,13 +396,18 @@ def analysis(db_path, model_name = 'VGG-Face', detector_backend = 'opencv', dist
 								#if True:
 								if best_distance <= threshold:
 									# Detected in database
-									print(employee_name)
 									display_img = cv2.imread(employee_name)
-
 									display_img = cv2.resize(display_img, (pivot_img_size, pivot_img_size))
 
 									label = employee_name.split("/")[-1].replace(".jpg", "")
+									print(label)
 									label = re.sub('[0-9]', '', label)
+
+									print(label)
+									text = f"""\
+									Go welcome {label}."""
+
+									send_email(f'{label} has entered the office', text)
 
 									try:
 										if y - pivot_img_size > 0 and x + w + pivot_img_size < resolution_x:
@@ -441,7 +470,11 @@ def analysis(db_path, model_name = 'VGG-Face', detector_backend = 'opencv', dist
 								else:
 									# Not Detected in Database
 									print('Face not Detected in Database')
+									text = f"""\
+									Please report this to security on site."""
+
 									# Send Alert
+									send_email('Unrecognized person alert!', text)
 
 						tic = time.time() #in this way, freezed image can show 5 seconds
 
