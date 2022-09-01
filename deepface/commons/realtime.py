@@ -173,6 +173,7 @@ def analysis(db_path, model_name = 'VGG-Face', detector_backend = 'opencv', dist
 
 		if face_detected == True and face_included_frames == frame_threshold and freeze == False:
 			freeze = True
+			print('Face detected')
 			#base_img = img.copy()
 			base_img = raw_img.copy()
 			detected_faces_final = detected_faces.copy()
@@ -343,7 +344,6 @@ def analysis(db_path, model_name = 'VGG-Face', detector_backend = 'opencv', dist
 						if custom_face.shape[1:3] == input_shape:
 							if df.shape[0] > 0: #if there are images to verify, apply face recognition
 								img1_representation = model.predict(custom_face)[0,:]
-
 								#print(freezed_frame," - ",img1_representation[0:5])
 
 								def findDistance(row):
@@ -371,7 +371,8 @@ def analysis(db_path, model_name = 'VGG-Face', detector_backend = 'opencv', dist
 
 								#if True:
 								if best_distance <= threshold:
-									#print(employee_name)
+									# Detected in database
+									print(employee_name)
 									display_img = cv2.imread(employee_name)
 
 									display_img = cv2.resize(display_img, (pivot_img_size, pivot_img_size))
@@ -437,6 +438,10 @@ def analysis(db_path, model_name = 'VGG-Face', detector_backend = 'opencv', dist
 											cv2.line(freeze_img, (x+int(w/2)+int(w/4), y+h+int(pivot_img_size/2)), (x+w, y+h+int(pivot_img_size/2)), (67,67,67),1)
 									except Exception as err:
 										print(str(err))
+								else:
+									# Not Detected in Database
+									print('Face not Detected in Database')
+									# Send Alert
 
 						tic = time.time() #in this way, freezed image can show 5 seconds
 
@@ -455,6 +460,7 @@ def analysis(db_path, model_name = 'VGG-Face', detector_backend = 'opencv', dist
 				face_included_frames = 0
 				freeze = False
 				freezed_frame = 0
+				print('Face not detected')
 
 		else:
 			cv2.imshow('img',img)
