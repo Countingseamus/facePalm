@@ -17,6 +17,8 @@ from deepface.commons import functions, realtime, distance as dst
 from deepface.detectors import FaceDetector
 from email.mime.multipart import MIMEMultipart
 
+sendAlert = False
+
 def send_email(subject, contents):
 	port = 587  # For starttls
 	smtp_server = "smtp.outlook.com"
@@ -400,14 +402,13 @@ def analysis(db_path, model_name = 'VGG-Face', detector_backend = 'opencv', dist
 									display_img = cv2.resize(display_img, (pivot_img_size, pivot_img_size))
 
 									label = employee_name.split("/")[-1].replace(".jpg", "")
-									print(label)
 									label = re.sub('[0-9]', '', label)
 
 									print(label)
 									text = f"""\
 									Go welcome {label}."""
-
-									send_email(f'{label} has entered the office', text)
+									if (sendAlert):
+										send_email(f'{label} has entered the office', text)
 
 									try:
 										if y - pivot_img_size > 0 and x + w + pivot_img_size < resolution_x:
@@ -474,7 +475,8 @@ def analysis(db_path, model_name = 'VGG-Face', detector_backend = 'opencv', dist
 									Please report this to security on site."""
 
 									# Send Alert
-									send_email('Unrecognized person alert!', text)
+									if (sendAlert):
+										send_email('Unrecognized person alert!', text)
 
 						tic = time.time() #in this way, freezed image can show 5 seconds
 
