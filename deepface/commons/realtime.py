@@ -17,7 +17,10 @@ from deepface.commons import functions, realtime, distance as dst
 from deepface.detectors import FaceDetector
 from email.mime.multipart import MIMEMultipart
 
-sendAlert = False
+sendGreeting = False
+# We only want to send one alert for unidentified person for demo purposes
+sendAlert = True
+labels = []
 
 def send_email(subject, contents):
 	port = 587  # For starttls
@@ -407,9 +410,12 @@ def analysis(db_path, model_name = 'VGG-Face', detector_backend = 'opencv', dist
 									print(label)
 									text = f"""\
 									Go welcome {label}."""
-									if (sendAlert):
-										send_email(f'{label} has entered the office', text)
 
+									# Send Greeting if name has not yet been sent i.e. only send greeting once
+									sendGreeting = label not in labels
+									if (sendGreeting):
+										send_email(f'{label} has entered the office', text)
+										labels.append(label)
 									try:
 										if y - pivot_img_size > 0 and x + w + pivot_img_size < resolution_x:
 											#top right
@@ -477,6 +483,8 @@ def analysis(db_path, model_name = 'VGG-Face', detector_backend = 'opencv', dist
 									# Send Alert
 									if (sendAlert):
 										send_email('Unrecognized person alert!', text)
+										# only send alert once for demo purposes
+										sendAlert = False
 
 						tic = time.time() #in this way, freezed image can show 5 seconds
 
@@ -495,7 +503,7 @@ def analysis(db_path, model_name = 'VGG-Face', detector_backend = 'opencv', dist
 				face_included_frames = 0
 				freeze = False
 				freezed_frame = 0
-				print('Face not detected')
+				print('Face not detected, move closer to the camera please.')
 
 		else:
 			cv2.imshow('img',img)
