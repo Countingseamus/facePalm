@@ -16,11 +16,9 @@ from deepface.extendedmodels import Age
 from deepface.commons import functions, realtime, distance as dst
 from deepface.detectors import FaceDetector
 from email.mime.multipart import MIMEMultipart
-
-sendGreeting = False
-# We only want to send one alert for unidentified person for demo purposes
-sendAlert = True
-labels = []
+from email.mime.image import MIMEImage
+from PIL import Image
+import numpy as np
 
 def send_email(subject, contents):
 	port = 587  # For starttls
@@ -153,6 +151,8 @@ def analysis(db_path, model_name = 'VGG-Face', detector_backend = 'opencv', dist
 
 	cap = cv2.VideoCapture(source) #webcam
 
+	labels = []
+	unknownPersonIncrement = 1
 	while(True):
 		ret, img = cap.read()
 
@@ -415,6 +415,9 @@ def analysis(db_path, model_name = 'VGG-Face', detector_backend = 'opencv', dist
 									sendGreeting = label not in labels
 									if (sendGreeting):
 										print(f'Sending greeting for {label}...')
+										# w, h = 512, 512
+										# imageOfKnownPerson = Image.fromarray(raw_img, 'RGB')
+										# imageOfKnownPerson.save(f'{label}.jpg')
 										send_email(f'{label} has entered the office', text)
 										print('Greeting sent')
 										labels.append(label)
@@ -482,9 +485,15 @@ def analysis(db_path, model_name = 'VGG-Face', detector_backend = 'opencv', dist
 									text = f"""\
 									Please report this to security on site."""
 
+									# We only want to send one alert for unidentified person for demo purposes
+									sendAlert = True
 									# Send Alert
 									if (sendAlert):
 										print('Sending Alert...')
+										# w, h = 512, 512
+										# imageOfUnknownPerson = Image.fromarray(raw_img, 'RGB')
+										# imageOfUnknownPerson.save(f'UnknownPerson{unknownPersonIncrement}.jpg')
+										unknownPersonIncrement+1
 										send_email('Unrecognized person alert!', text)
 										print('Alert sent.')
 										# only send alert once for demo purposes
