@@ -20,7 +20,13 @@ from email.mime.image import MIMEImage
 from PIL import Image
 import numpy as np
 import pymsteams
+import winsound
 
+def beep_notification(occurences):
+	duration = 1000  # millisecs
+	freq = 440  # Hz
+	for x in range(occurences):
+		winsound.Beep(freq, duration)
 def send_teams_notification(title, text):
 	teamsChannel = pymsteams.connectorcard("https://bd1.webhook.office.com/webhookb2/b15439e3-73ef-47ae-8360-b21529b8df55@94c3e67c-9e2d-4800-a6b7-635d97882165/IncomingWebhook/bc099d8d9e5e4cdda2a1dab1fbe4bf6b/353036d5-8e17-4d4c-8e4b-abfdef1371ec")
 	teamsChannel.title(title)
@@ -166,6 +172,8 @@ def analysis(db_path, model_name = 'VGG-Face', detector_backend = 'opencv', dist
 
 	labels = []
 	unknownPersonIncrement = 1
+	# We only want to send one alert for unidentified person for demo purposes
+	sendAlert = True
 	while(True):
 		ret, img = cap.read()
 
@@ -427,6 +435,7 @@ def analysis(db_path, model_name = 'VGG-Face', detector_backend = 'opencv', dist
 									# Send Greeting if name has not yet been sent i.e. only send greeting once
 									sendGreeting = label not in labels
 									if (sendGreeting):
+										beep_notification(1)
 										print(f'Sending greeting for {label}...')
 										w, h = 512, 512
 										imageOfKnownPerson = Image.fromarray(raw_img, 'RGB')
@@ -499,10 +508,10 @@ def analysis(db_path, model_name = 'VGG-Face', detector_backend = 'opencv', dist
 									text = f"""\
 									Please report this to security on site."""
 
-									# We only want to send one alert for unidentified person for demo purposes
-									sendAlert = True
+
 									# Send Alert
 									if (sendAlert):
+										beep_notification(3)
 										print('Sending Alert...')
 										w, h = 512, 512
 										imageOfUnknownPerson = Image.fromarray(raw_img, 'RGB')
