@@ -507,7 +507,6 @@ def analysis(db_path, model_name = 'VGG-Face', detector_backend = 'opencv', dist
 				face_included_frames = 0
 				freeze = False
 				freezed_frame = 0
-				print('Face not detected, move closer to the camera please.')
 
 		else:
 			cv2.imshow('img',img)
