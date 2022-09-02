@@ -25,8 +25,8 @@ labels = []
 def send_email(subject, contents):
 	port = 587  # For starttls
 	smtp_server = "smtp.outlook.com"
-	sender_email = "akshay.ramaswamy@bd.com"
-	receiver_email = "akshay.ramaswamy@bd.com"
+	sender_email = "seamus.halton@bd.com"
+	receiver_email = "seamus.halton@bd.com"
 	password = os.environ.get('EMAIL_PASSWD')  # Environment variable set to store password
 	message = MIMEMultipart("alternative")
 	message['Subject'] = subject
@@ -407,14 +407,16 @@ def analysis(db_path, model_name = 'VGG-Face', detector_backend = 'opencv', dist
 									label = employee_name.split("/")[-1].replace(".jpg", "")
 									label = re.sub('[0-9]', '', label)
 
-									print(label)
+									print(f'Recognized {label}')
 									text = f"""\
 									Go welcome {label}."""
 
 									# Send Greeting if name has not yet been sent i.e. only send greeting once
 									sendGreeting = label not in labels
 									if (sendGreeting):
+										print(f'Sending greeting for {label}...')
 										send_email(f'{label} has entered the office', text)
+										print('Greeting sent')
 										labels.append(label)
 									try:
 										if y - pivot_img_size > 0 and x + w + pivot_img_size < resolution_x:
@@ -482,7 +484,9 @@ def analysis(db_path, model_name = 'VGG-Face', detector_backend = 'opencv', dist
 
 									# Send Alert
 									if (sendAlert):
+										print('Sending Alert...')
 										send_email('Unrecognized person alert!', text)
+										print('Alert sent.')
 										# only send alert once for demo purposes
 										sendAlert = False
 
