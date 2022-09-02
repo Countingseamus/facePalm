@@ -20,18 +20,23 @@ from email.mime.image import MIMEImage
 from PIL import Image
 import numpy as np
 
-def send_email(subject, contents):
+def send_email(subject, contents, imagePath):
 	port = 587  # For starttls
 	smtp_server = "smtp.outlook.com"
 	sender_email = "seamus.halton@bd.com"
 	receiver_email = "seamus.halton@bd.com"
 	password = os.environ.get('EMAIL_PASSWD')  # Environment variable set to store password
-	message = MIMEMultipart("alternative")
+	message = MIMEMultipart()
 	message['Subject'] = subject
 	text = contents
 
 	body = MIMEText(text, "plain")
 	message.attach(body)
+
+	with open(imagePath, 'rb') as f:
+		img_data = f.read()
+	image = MIMEImage(img_data, name=os.path.basename(imagePath))
+	message.attach(image)
 
 	context = ssl.create_default_context()
 	with smtplib.SMTP(smtp_server, port) as server:
@@ -40,6 +45,7 @@ def send_email(subject, contents):
 		server.ehlo()
 		server.login(sender_email, password)
 		server.sendmail(sender_email, receiver_email, message.as_string())
+		server.quit()
 
 def analysis(db_path, model_name = 'VGG-Face', detector_backend = 'opencv', distance_metric = 'cosine', enable_face_analysis = True, source = 0, time_threshold = 5, frame_threshold = 5):
 
@@ -415,10 +421,10 @@ def analysis(db_path, model_name = 'VGG-Face', detector_backend = 'opencv', dist
 									sendGreeting = label not in labels
 									if (sendGreeting):
 										print(f'Sending greeting for {label}...')
-										# w, h = 512, 512
-										# imageOfKnownPerson = Image.fromarray(raw_img, 'RGB')
-										# imageOfKnownPerson.save(f'{label}.jpg')
-										send_email(f'{label} has entered the office', text)
+										w, h = 512, 512
+										imageOfKnownPerson = Image.fromarray(raw_img, 'RGB')
+										imageOfKnownPerson.save(f'KnownPeople/{label}.jpg')
+										send_email(f'{label} has entered the office', text, f'KnownPeople/{label}.jpg')
 										print('Greeting sent')
 										labels.append(label)
 									try:
@@ -490,11 +496,11 @@ def analysis(db_path, model_name = 'VGG-Face', detector_backend = 'opencv', dist
 									# Send Alert
 									if (sendAlert):
 										print('Sending Alert...')
-										# w, h = 512, 512
-										# imageOfUnknownPerson = Image.fromarray(raw_img, 'RGB')
-										# imageOfUnknownPerson.save(f'UnknownPerson{unknownPersonIncrement}.jpg')
+										w, h = 512, 512
+										imageOfUnknownPerson = Image.fromarray(raw_img, 'RGB')
+										imageOfUnknownPerson.save(f'UnknownPeople/UnknownPerson{unknownPersonIncrement}.jpg')
 										unknownPersonIncrement+1
-										send_email('Unrecognized person alert!', text)
+										send_email('Unrecognized person alert!', text, f'UnknownPeople/UnknownPerson{unknownPersonIncrement}.jpg')
 										print('Alert sent.')
 										# only send alert once for demo purposes
 										sendAlert = False
