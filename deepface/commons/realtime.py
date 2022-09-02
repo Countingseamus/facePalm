@@ -19,6 +19,13 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.image import MIMEImage
 from PIL import Image
 import numpy as np
+import pymsteams
+
+def send_teams_notification(title, text):
+	teamsChannel = pymsteams.connectorcard("https://bd1.webhook.office.com/webhookb2/b15439e3-73ef-47ae-8360-b21529b8df55@94c3e67c-9e2d-4800-a6b7-635d97882165/IncomingWebhook/bc099d8d9e5e4cdda2a1dab1fbe4bf6b/353036d5-8e17-4d4c-8e4b-abfdef1371ec")
+	teamsChannel.title(title)
+	teamsChannel.text(text)
+	teamsChannel.send()
 
 def send_email(subject, contents, imagePath):
 	port = 587  # For starttls
@@ -425,6 +432,7 @@ def analysis(db_path, model_name = 'VGG-Face', detector_backend = 'opencv', dist
 										imageOfKnownPerson = Image.fromarray(raw_img, 'RGB')
 										imageOfKnownPerson.save(f'KnownPeople/{label}.jpg')
 										send_email(f'{label} has entered the office', text, f'KnownPeople/{label}.jpg')
+										send_teams_notification(f'{label} has entered the office', text)
 										print('Greeting sent')
 										labels.append(label)
 									try:
@@ -501,6 +509,7 @@ def analysis(db_path, model_name = 'VGG-Face', detector_backend = 'opencv', dist
 										imageOfUnknownPerson.save(f'UnknownPeople/UnknownPerson{unknownPersonIncrement}.jpg')
 										unknownPersonIncrement+1
 										send_email('Unrecognized person alert!', text, f'UnknownPeople/UnknownPerson{unknownPersonIncrement}.jpg')
+										send_teams_notification('Unrecognized person alert!', text)
 										print('Alert sent.')
 										# only send alert once for demo purposes
 										sendAlert = False
