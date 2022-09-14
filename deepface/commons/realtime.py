@@ -28,7 +28,7 @@ def beep_notification(occurences):
 	for x in range(occurences):
 		winsound.Beep(freq, duration)
 def send_teams_notification(title, text):
-	teamsChannel = pymsteams.connectorcard("https://bd1.webhook.office.com/webhookb2/b15439e3-73ef-47ae-8360-b21529b8df55@94c3e67c-9e2d-4800-a6b7-635d97882165/IncomingWebhook/bc099d8d9e5e4cdda2a1dab1fbe4bf6b/353036d5-8e17-4d4c-8e4b-abfdef1371ec")
+	teamsChannel = pymsteams.connectorcard("link")
 	teamsChannel.title(title)
 	teamsChannel.text(text)
 	teamsChannel.send()
